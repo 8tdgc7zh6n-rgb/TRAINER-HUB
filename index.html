@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="pl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Power Live</title>
+<style>
+:root{--bg:#121820;--pn:#1a232e;--ln:#2b3948;--tx:#eef2f6;--mu:#8fa1b3;--pw:#ffb347;--wb:#5ad1c4;--lo:#ff6b5e}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font-family:"Segoe UI",system-ui,sans-serif;padding:14px;max-width:1100px;margin-inline:auto}
+header{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:12px}
+h1{font-size:18px;margin:0 auto 0 0;font-weight:600}
+button{background:var(--pn);color:var(--tx);border:1px solid var(--ln);border-radius:6px;padding:8px 14px;font-size:14px;cursor:pointer}
+button:hover{border-color:var(--mu)}button:focus-visible,input:focus-visible{outline:2px solid var(--pw);outline-offset:2px}
+button.pri{background:var(--pw);color:#1a1205;border-color:var(--pw);font-weight:600}
+#st{color:var(--mu);font-size:13px;width:100%}
+summary{cursor:pointer;font-weight:600}.sub{font-size:13px;font-weight:600;margin:14px 0 8px}
+body:not(.sm)>#sett{display:none}body.sm>*:not(#sett){display:none}body.sm #sett summary{display:none}
+dialog{background:var(--pn);color:var(--tx);border:1px solid var(--ln);border-radius:8px;padding:0;width:min(720px,94vw)}
+dialog::backdrop{background:#000b}
+.sd{padding:16px}.sh{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;font-size:16px}
+.sg{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.sc{border:1px solid var(--ln);border-radius:8px;padding:12px;min-height:240px}
+#sc-power{border-top:3px solid var(--pw)}#sc-hr{border-top:3px solid var(--lo)}
+.st1{font-weight:600;font-size:16px;margin-bottom:8px}
+.sl{display:flex;flex-direction:column;gap:6px;margin-top:10px}.sl button{text-align:left}
+@media(max-width:600px){.sg{grid-template-columns:1fr}}
+h2.sec{font-family:"Bahnschrift","DIN Alternate","Segoe UI Semibold","Segoe UI",system-ui,sans-serif;font-size:21px;font-weight:600;letter-spacing:.01em;margin:0 0 8px;padding-left:10px;border-left:4px solid var(--pw);line-height:1.2}
+.hero>div{display:flex;flex-direction:column}.hero>div>.pn{flex:1}
+.duo{display:flex;gap:30px;flex-wrap:wrap}.big.hrc{color:var(--lo)}
+body{padding-top:max(14px,env(safe-area-inset-top));padding-bottom:max(14px,env(safe-area-inset-bottom));padding-left:max(14px,env(safe-area-inset-left));padding-right:max(14px,env(safe-area-inset-right))}
+[data-sec="laps"] .pn{overflow-x:auto}table{min-width:560px}
+@media(pointer:coarse){button{min-height:44px}}
+@media(max-width:700px){input{font-size:16px}.duo{gap:18px}.v{font-size:22px}}
+body.setin>#sett{display:block!important;position:fixed;inset:0;z-index:50;overflow:auto;background:var(--bg);margin:0!important;border-radius:0;padding:max(16px,env(safe-area-inset-top)) 16px 28px}
+body.setin #sett summary{display:none}#sx{display:none}body.setin #sx{display:inline-block}
+.set{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:12px;font-size:13px;color:var(--mu)}
+.set label{display:flex;align-items:center;gap:6px}
+input{width:80px;background:var(--pn);color:var(--tx);border:1px solid var(--ln);border-radius:6px;padding:6px}
+.hero{display:grid;grid-template-columns:1.2fr 1fr;gap:12px;margin-bottom:12px}
+.pn{background:var(--pn);border:1px solid var(--ln);border-radius:8px;padding:14px}
+.big{font-size:72px;line-height:1;font-weight:700;color:var(--pw);font-variant-numeric:tabular-nums}
+.big small{font-size:20px;color:var(--mu);font-weight:400;margin-left:4px}
+.lb{font-size:13px;color:var(--mu);margin-bottom:6px}
+.row{display:flex;gap:22px;flex-wrap:wrap;margin-top:10px}
+.v{font-size:26px;font-weight:600;font-variant-numeric:tabular-nums}
+.bar{position:relative;height:34px;background:linear-gradient(90deg,hsl(0 80% 55%),hsl(60 85% 55%),hsl(120 65% 50%));border-radius:6px;overflow:hidden;border:1px solid var(--ln);margin:8px 0}
+#bf{position:absolute;right:0;top:0;height:100%;width:0;background:#0c1117;transition:width .4s}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:12px}
+canvas{width:100%;height:190px;display:block}
+table{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+th,td{padding:6px 8px;text-align:right;border-bottom:1px solid var(--ln)}th:first-child,td:first-child{text-align:left}
+th{color:var(--mu);font-weight:500}
+@media(max-width:700px){.hero{grid-template-columns:1fr}.big{font-size:64px}}
+</style></head><body>
+<header>
+<h1>Power Live</h1>
+<button class="pri" id="bConn">Połącz sensor</button>
+<button id="bDemo">Tryb demo</button>
+<button id="bLap">Okrążenie (spacja)</button>
+<button id="bCsv">Eksport CSV</button>
+<button class="pri" id="bRec">Start</button>
+<button id="bEnd" style="display:none">Zakończ trening</button>
+<button id="bSet">Ustawienia</button>
+<div id="st">Nie połączono.</div>
+</header>
+<dialog id="endd" style="width:min(620px,94vw)"><div class="sd"><div class="sh"><b>Zakończyć trening?</b></div>
+<div class="stats" id="ends" style="margin-bottom:14px"></div>
+<div class="row" style="margin:0"><button class="pri" id="eSave" type="button">Zapisz (.fit)</button><button id="eDel" type="button">Usuń</button><button id="eCan" type="button">Anuluj</button></div></div></dialog>
+<dialog id="sens"><div class="sd">
+<div class="sh"><b>Połącz sensor</b><button id="sClose" type="button">Zamknij</button></div>
+<div class="sg">
+<div class="sc" id="sc-power"><div class="st1" style="color:var(--pw)">⚡ Moc</div>
+<button type="button" class="sb" data-k="power">Szukaj czujnika mocy</button>
+<label class="lb" style="display:block;margin-top:8px"><input type="checkbox" id="all-power" style="width:auto"> pokaż wszystkie urządzenia BLE</label>
+<div class="lb" id="ss-power" style="margin-top:8px">Nie połączono.</div><div class="lb" id="sd-power" style="margin-top:4px"></div><div class="sl lb" id="sl-power"></div></div>
+<div class="sc" id="sc-hr"><div class="st1" style="color:var(--lo)">❤ Tętno</div>
+<button type="button" class="sb" data-k="hr">Szukaj czujnika HR</button>
+<label class="lb" style="display:block;margin-top:8px"><input type="checkbox" id="all-hr" style="width:auto"> pokaż wszystkie urządzenia BLE</label>
+<div class="lb" id="ss-hr" style="margin-top:8px">Nie połączono.</div><div class="lb" id="sd-hr" style="margin-top:4px"></div><div class="sl lb" id="sl-hr"></div></div>
+</div></div></dialog>
+<details class="pn" id="sett" style="margin-bottom:12px"><summary>Ustawienia</summary><button id="sx" type="button" style="margin:0 0 8px">Zamknij ustawienia</button>
+<div class="sub">Ustawienia użytkownika</div>
+<div class="set">
+<label>Waga (kg) <input id="kg" type="number" value="75" min="30" step="0.5"></label>
+<label>FTP (W) <input id="ftp" type="number" value="250" min="50"></label>
+<label>HRmax (bpm) <input id="hrm" type="number" value="190" min="100" max="230"></label>
+<label>CP (W) <input id="cp" type="number" value="250" min="50"></label>
+<label>W' (kJ) <input id="wp" type="number" value="20" min="1" step="0.5"></label>
+</div>
+<div class="sub">Strefy (wyliczane z FTP i HRmax, można poprawić ręcznie)</div><div id="zed"></div>
+<div class="sub">Okrążenia</div>
+<div class="set">
+<label>Przycisk okrążenia <button id="bKey" type="button">Spacja</button></label>
+<label id="glw" style="display:none"><input type="checkbox" id="gl" style="width:auto"> globalnie (także gdy okno jest w tle)</label>
+<span id="kst"></span>
+<label>Auto-okrążenie (min, 0 = wył.) <input id="al" type="number" value="0" min="0"></label>
+</div>
+<div class="sub">Ustawienia globalne: widoczne sekcje</div>
+<div class="set">
+<label><input type="checkbox" class="vs" data-k="hero" style="width:auto"> Na żywo i W'bal</label>
+<label><input type="checkbox" class="vs" data-k="stats" style="width:auto"> Statystyki</label>
+<label><input type="checkbox" class="vs" data-k="wm" style="width:auto"> Workout Mode</label>
+<label><input type="checkbox" class="vs" data-k="zones" style="width:auto"> Strefy</label>
+<label><input type="checkbox" class="vs" data-k="chart" style="width:auto"> Wykres</label>
+<label><input type="checkbox" class="vs" data-k="laps" style="width:auto"> Tabela okrążeń</label>
+</div>
+<div id="winset" style="display:none"><div class="sub">Ustawienia globalne: okno</div>
+<div class="set">
+<label>Szerokość (px) <input id="ww" type="number" value="1150" min="600"></label>
+<label>Wysokość (px) <input id="wh" type="number" value="900" min="500"></label>
+<label><input type="checkbox" id="wt" style="width:auto"> zawsze na wierzchu</label>
+<button id="bWin" type="button">Zastosuj rozmiar</button>
+</div></div>
+</details>
+<div class="hero" data-sec="hero">
+<div><h2 class="sec">Na żywo</h2><div class="pn">
+<div class="duo">
+<div><div class="lb">Moc</div><div class="big"><span id="pw">0</span><small>W</small></div></div>
+<div><div class="lb">Tętno</div><div class="big hrc"><span id="hrv">–</span><small>bpm</small></div></div>
+</div>
+<div class="row">
+<div><div class="lb">Średnia 3 s</div><div class="v" id="a3">0</div></div>
+<div><div class="lb">W/kg (3 s)</div><div class="v" id="wk">0.00</div></div>
+<div><div class="lb">Strefa mocy</div><div class="v" id="zpw">–</div></div>
+<div><div class="lb">Strefa HR</div><div class="v" id="zhr">–</div></div>
+<div><div class="lb">Kadencja</div><div class="v" id="cd">0</div></div>
+</div></div></div>
+<div><h2 class="sec">Dostępny W'bal do wyczerpania</h2><div class="pn">
+<div class="v" id="wbt">20.0 kJ (100%)</div>
+<div class="bar"><div id="bf"></div></div>
+<div class="lb">Poniżej CP rośnie, powyżej CP maleje (model Skiby). Kolor przechodzi z zielonego w czerwony wraz ze spadkiem.</div>
+</div></div>
+</div>
+<div data-sec="stats"><h2 class="sec">Statystyki</h2><div class="stats">
+<div class="pn"><div class="lb">Czas okrążenia</div><div class="v" id="lt">0:00</div></div>
+<div class="pn"><div class="lb">Średnia okrążenia</div><div class="v" id="la">0</div></div>
+<div class="pn"><div class="lb">W/kg okrążenia</div><div class="v" id="lk">0.00</div></div>
+<div class="pn"><div class="lb">Max okrążenia</div><div class="v" id="lm">0</div></div>
+<div class="pn"><div class="lb">Średnia sesji</div><div class="v" id="sa">0</div></div>
+<div class="pn"><div class="lb">NP sesji</div><div class="v" id="np">0</div></div>
+<div class="pn"><div class="lb">IF (sesja)</div><div class="v" id="ifv">–</div></div>
+<div class="pn"><div class="lb">TSS</div><div class="v" id="tss">–</div></div>
+<div class="pn"><div class="lb">Spalone kcal</div><div class="v" id="kc">0</div></div>
+<div class="pn"><div class="lb">Praca (kJ)</div><div class="v" id="kj">0</div></div>
+</div></div>
+<div data-sec="wm" style="margin-bottom:12px"><h2 class="sec">Workout Mode</h2><div class="pn"><div class="lb">Wczytaj plik .fit z treningiem. Okrążenia klikają się same po każdym bloku. Trening rusza razem z przyciskiem Start.</div>
+<div class="row" style="margin:0 0 10px;align-items:center"><input type="file" id="wf" accept=".fit" style="width:auto"><span id="wst" class="lb"></span></div>
+<div class="row" style="margin:0"><div><div class="lb">Blok</div><div class="v" id="wsn">–</div></div><div><div class="lb">Pozostało</div><div class="v" id="wtm">–</div></div><div><div class="lb">Cel</div><div class="v" id="wtg">–</div></div><div><div class="lb">Następny</div><div class="v" id="wnx">–</div></div></div></div></div>
+<div data-sec="zones" style="margin-bottom:12px"><h2 class="sec">Czas w strefach</h2><div class="pn"><div id="zbars"></div></div></div>
+<div data-sec="chart" style="margin-bottom:12px"><h2 class="sec">Wykres: ostatnie 5 minut</h2><div class="pn"><div class="lb">Moc (pomarańczowy), W'bal (turkusowy), tętno (czerwony, skala do HRmax), CP (linia przerywana)</div><canvas id="cv" width="1000" height="190"></canvas></div></div>
+<div data-sec="laps"><h2 class="sec">Okrążenia</h2><div class="pn">
+<table><thead><tr><th>#</th><th>Czas</th><th>Śr. W</th><th>W/kg</th><th>Max W</th><th>Kadencja</th><th>Śr. HR</th><th>W'bal końca</th><th>W'bal min</th></tr></thead><tbody id="lb"></tbody></table></div></div>
+<script>
+const $=id=>document.getElementById(id);
+let S=[],laps=[],lapStart=0,wb=0,lastP=0,lastTs=0,cad=0,lastCadTs=0,prevCr=null,timer=null,demoOn=false,
+    sum=0,sum4=0,n4=0,win=[],winSum=0;
+const fmt=s=>Math.floor(s/60)+":"+String(s%60).padStart(2,"0");
+const KG=()=>+$("kg").value||75, CP=()=>+$("cp").value||250, WP=()=>(+$("wp").value||20)*1000;
+try{const c=JSON.parse(localStorage.getItem("pl")||"{}");if(c.cp)$("cp").value=c.cp;if(c.wp)$("wp").value=c.wp;if(c.al!=null)$("al").value=c.al;if(c.kg)$("kg").value=c.kg;if(c.ftp)$("ftp").value=c.ftp;if(c.hrm)$("hrm").value=c.hrm}catch(e){}
+["cp","wp","al","kg","ftp","hrm"].forEach(i=>$(i).addEventListener("change",()=>{try{localStorage.setItem("pl",JSON.stringify({cp:$("cp").value,wp:$("wp").value,al:$("al").value,kg:$("kg").value,ftp:$("ftp").value,hrm:$("hrm").value}))}catch(e){}}));
+wb=WP();
+const st=t=>$("st").textContent=t;
+
+function onPow(e){
+  const d=e.target.value,f=d.getUint16(0,true);
+  lastP=Math.max(0,d.getInt16(2,true));lastTs=Date.now();
+  let o=4;if(f&1)o+=1;if(f&4)o+=2;if(f&16)o+=6;
+  if(f&32&&d.byteLength>=o+4){
+    if(!cpsCad){cpsCad=true;const el=$("sd-power");el.textContent=el.textContent.replace("nie wykryto","tak")}
+    const r=d.getUint16(o,true),t=d.getUint16(o+2,true);
+    if(prevCr){const dr=(r-prevCr.r+65536)%65536,dt=(t-prevCr.t+65536)%65536;
+      if(dt>0){cad=Math.round(dr/dt*1024*60);lastCadTs=Date.now()}}
+    prevCr={r,t};
+  }
+}
+const ss={power:"",hr:""};
+const NM={"00001818":"moc (CPS)","00001816":"kadencja (CSC)","0000180d":"tętno","0000180f":"bateria","0000180a":"info o urządzeniu"};
+let cpsCad=false;
+function stS(k,t){ss[k]=t;st("⚡ "+(ss.power||"–")+"   ❤ "+(ss.hr||"–"));$("ss-"+k).textContent=t==="rozłączony"?"Rozłączono.":"Połączono: "+t}
+async function connect(kind){
+  const hr=kind==="hr";
+  if(!navigator.bluetooth){st("Ta przeglądarka nie obsługuje Web Bluetooth. Na iPhonie użyj Bluefy, na komputerze Chrome lub Edge.");return}
+  try{
+    $("ss-"+kind).textContent="Szukam…";if(window.powerLive){$("sl-"+kind).textContent="Szukam czujników…";window.powerLive.setSensorKind(kind)}
+    const svc=hr?"heart_rate":"cycling_power";
+    const all=$("all-"+kind).checked;
+    const opt=[svc,"cycling_speed_and_cadence","battery_service","device_information"];
+    const dev=await navigator.bluetooth.requestDevice(all?{acceptAllDevices:true,optionalServices:opt}:{filters:[{services:[svc]}],optionalServices:opt});
+    dev.addEventListener("gattserverdisconnected",()=>stS(kind,"rozłączony"));
+    const srv=await dev.gatt.connect(),sv=await srv.getPrimaryService(svc),
+          ch=await sv.getCharacteristic(hr?"heart_rate_measurement":"cycling_power_measurement");
+    await ch.startNotifications();ch.addEventListener("characteristicvaluechanged",hr?onHr:onPow);
+    if(!hr){demoOn=false;cpsCad=false}
+    try{const sl=await srv.getPrimaryServices();$("sd-"+kind).textContent="Usługi: "+sl.map(x=>NM[x.uuid.slice(0,8)]||x.uuid.slice(0,8)).join(", ")+(hr?"":" | kadencja w pakiecie mocy: nie wykryto")}catch(x){}
+    stS(kind,dev.name||"połączono");start();
+  }catch(e){if(e.name==="NotFoundError"){$("ss-"+kind).textContent=/service/i.test(e.message)?"To urządzenie nie udostępnia tych danych.":"Anulowano."}else{$("ss-"+kind).textContent="Błąd.";st("Błąd połączenia: "+e.message)}}
+  finally{$("sl-"+kind).textContent=""}
+}
+function onHr(e){const d=e.target.value;lastHr=d.getUint8(0)&1?d.getUint16(1,true):d.getUint8(1);lastHrTs=Date.now()}
+function start(){if(!timer)timer=setInterval(tick,1000)}
+function demoP(i){const c=i%420;let p=c<180?150:c<210?380:c<300?140:c<330?340:150;return Math.max(0,Math.round(p+(Math.random()-.5)*30))}
+
+function tick(){
+  const now=Date.now();
+  if(demoOn){lastP=demoP(S.length);lastTs=now;cad=88+Math.round(Math.random()*8);lastCadTs=now;lastHr=Math.round(95+Math.min(75,lastP/4)+Math.random()*3);lastHrTs=now}
+  const p=now-lastTs>3000?0:lastP;if(now-lastCadTs>3000)cad=0;
+  const hr=now-lastHrTs>5000?0:lastHr;
+  if(!rec.on){live(p,hr);return}
+  const cp=CP(),w=WP();
+  if(p>cp)wb-=(p-cp);else wb+=(cp-p)*(w-wb)/w;
+  wb=Math.min(w,Math.max(0,wb));
+  win.push(p);winSum+=p;if(win.length>30)winSum-=win.shift();
+  if(win.length===30){const r=winSum/30;sum4+=r**4;n4++}
+  sum+=p;
+  S.push({p,c:cad,hr,wb,lap:laps.length+1});
+  zp[zoneOf(PZ(),p)]++;if(hr)zh[zoneOf(HZ(),hr)]++;
+  if(wm.on)wmTick();else{const al=+$("al").value;if(al>0&&S.length-lapStart>=al*60)doLap()}
+  render();
+}
+function seg(){return S.slice(lapStart)}
+function doLap(){
+  const g=seg();if(g.length<2)return;
+  const avg=g.reduce((a,s)=>a+s.p,0)/g.length,
+        cd=g.reduce((a,s)=>a+s.c,0)/g.length;
+  laps.push({st:lapStart,nm:(wm.on&&wm.steps[wm.i])?wm.steps[wm.i].name:"",n:laps.length+1,dur:g.length,avg:Math.round(avg),max:Math.max(...g.map(s=>s.p)),cad:Math.round(cd),hr:(h=>h.length?Math.round(h.reduce((a,x)=>a+x.hr,0)/h.length):0)(g.filter(x=>x.hr)),wb:g[g.length-1].wb,mn:Math.min(...g.map(s=>s.wb))});
+  lapStart=S.length;
+  $("lb").innerHTML=laps.map(l=>`<tr><td>${l.n}${l.nm?" "+l.nm:""}</td><td>${fmt(l.dur)}</td><td>${l.avg}</td><td>${(l.avg/KG()).toFixed(2)}</td><td>${l.max}</td><td>${l.cad}</td><td>${l.hr||"–"}</td><td>${(l.wb/1000).toFixed(1)} kJ</td><td>${(l.mn/1000).toFixed(1)} kJ</td></tr>`).join("");
+}
+function render(){
+  const s=S[S.length-1];if(!s)return;
+  const w=WP(),pct=Math.round(s.wb/w*100);
+  $("pw").textContent=s.p;
+  const a3=S.slice(-3).reduce((a,x)=>a+x.p,0)/Math.min(3,S.length);
+  $("a3").textContent=Math.round(a3);
+  $("wk").textContent=(a3/KG()).toFixed(2);
+  $("cd").textContent=s.c;
+  $("wbt").textContent=(s.wb/1000).toFixed(1)+" kJ ("+pct+"%)";
+  $("bf").style.width=(100-pct)+"%";$("wbt").style.color="hsl("+Math.round(pct*1.2)+" 80% 58%)";
+  const g=seg();
+  $("lt").textContent=fmt(g.length);
+  const la=g.reduce((a,x)=>a+x.p,0)/g.length;
+  $("la").textContent=Math.round(la);
+  $("lk").textContent=(la/KG()).toFixed(2);
+  $("lm").textContent=Math.max(...g.map(x=>x.p));
+  wmRender();zoneRender();
+  $("sa").textContent=Math.round(sum/S.length);
+  $("np").textContent=n4?Math.round((sum4/n4)**.25):"–";
+  {const np=n4?(sum4/n4)**.25:0,ftp=FTP(),IFv=np/ftp;
+   $("ifv").textContent=n4?IFv.toFixed(2):"–";
+   $("tss").textContent=n4?Math.round(S.length*np*IFv/(ftp*3600)*100):"–";
+   $("kc").textContent=Math.round(sum/1004);$("kj").textContent=Math.round(sum/1000)}
+  draw();
+}
+function draw(){
+  const c=$("cv"),x=c.getContext("2d"),W=c.width,H=c.height,d=S.slice(-300),cp=CP();
+  x.clearRect(0,0,W,H);
+  const mx=Math.max(cp*1.6,...d.map(s=>s.p),100),Y=v=>H-6-(v/mx)*(H-12);
+  x.strokeStyle="#8fa1b3";x.setLineDash([6,5]);x.lineWidth=1;x.beginPath();x.moveTo(0,Y(cp));x.lineTo(W,Y(cp));x.stroke();x.setLineDash([]);
+  const line=(f,col)=>{x.strokeStyle=col;x.lineWidth=2;x.beginPath();d.forEach((s,i)=>{const px=i/299*W;i?x.lineTo(px,f(s)):x.moveTo(px,f(s))});x.stroke()};
+  line(s=>Y(s.p),"#ffb347");
+  line(s=>H-6-(s.wb/WP())*(H-12),"#5ad1c4");
+  if(d.some(s=>s.hr))line(s=>H-6-(s.hr/HRM())*(H-12),"#ff6b5e");
+}
+function csv(){
+  if(!S.length)return;
+  const rows=["sekunda,okrazenie,moc_W,W_kg,kadencja,tetno,wbal_J"].concat(S.map((s,i)=>[i+1,s.lap,s.p,(s.p/KG()).toFixed(2),s.c,s.hr,Math.round(s.wb)].join(",")));
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([rows.join("\n")],{type:"text/csv"}));
+  a.download="sesja-"+new Date().toISOString().slice(0,16).replace(/[:T]/g,"-")+".csv";a.click();
+}
+function reset(){S=[];laps=[];lapStart=0;wb=WP();sum=sum4=n4=winSum=0;win=[];zp.fill(0);zh.fill(0);$("lb").innerHTML="";["pw","a3","cd","la","lm","sa"].forEach(i=>$(i).textContent="0");$("wk").textContent=$("lk").textContent="0.00";$("lt").textContent="0:00";$("np").textContent="–";["ifv","tss"].forEach(i=>$(i).textContent="–");$("kc").textContent=$("kj").textContent="0";$("wbt").textContent=(wb/1000).toFixed(1)+" kJ (100%)";$("bf").style.width="0%";$("wbt").style.color="hsl(120 80% 58%)";draw()}
+
+// ===== Workout Mode =====
+let wm={steps:[],i:0,el:0,on:false},ac=null;
+const FTP=()=>+$("ftp").value||250;
+function beep(f,d){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(ac.state==="suspended")ac.resume();const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f;g.gain.value=.15;o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+d)}catch(e){}}
+function parseFit(buf){
+  const d=new DataView(buf),hs=d.getUint8(0),end=Math.min(buf.byteLength,hs+d.getUint32(4,true));
+  let o=hs;const defs={},raw=[];
+  while(o<end){
+    const h=d.getUint8(o++);
+    if(h&0x40){
+      const le=d.getUint8(o+1)===0,gm=d.getUint16(o+2,le),nf=d.getUint8(o+4);o+=5;
+      const f=[];for(let i=0;i<nf;i++){f.push({n:d.getUint8(o),s:d.getUint8(o+1)});o+=3}
+      if(h&0x20){o+=d.getUint8(o)*3+1}
+      defs[h&15]={gm,f,le};
+    }else{
+      const df=defs[(h&0x80)?((h>>5)&3):(h&15)];if(!df)break;
+      const rec={};
+      for(const f of df.f){
+        if(df.gm===27){
+          if(f.n===0){let t="";for(let i=0;i<f.s;i++){const c=d.getUint8(o+i);if(!c)break;t+=String.fromCharCode(c)}rec.name=t}
+          else rec[f.n]=f.s===1?d.getUint8(o):f.s===2?d.getUint16(o,df.le):f.s===4?d.getUint32(o,df.le):0;
+        }
+        o+=f.s;
+      }
+      if(df.gm===27)raw.push(rec);
+    }
+  }
+  raw.sort((a,b)=>(a[254]||0)-(b[254]||0));
+  const out=[],pos={};
+  raw.forEach((r,i)=>{
+    const idx=r[254]!=null?r[254]:i;pos[idx]=out.length;
+    if(r[1]===6){const blk=out.slice(pos[r[2]]);for(let k=1;k<(r[4]||1);k++)blk.forEach(b=>out.push({...b}));return}
+    const st={name:r.name||"Blok "+(out.length+1),dur:r[1]===0?r[2]/1000:null,l:0,h:0,pct:false};
+    if(r[3]===4){let lo=r[5]||0,hi=r[6]||lo;if(lo>1000){st.l=lo-1000;st.h=hi-1000}else if(lo>0){st.l=lo;st.h=hi;st.pct=true}}
+    out.push(st);
+  });
+  return out;
+}
+function tgt(s){if(!s||!s.l)return null;return s.pct?[Math.round(s.l*FTP()/100),Math.round(s.h*FTP()/100)]:[s.l,s.h]}
+function nextStep(){
+  wm.i++;wm.el=0;
+  if(wm.i>=wm.steps.length){wm.on=false;beep(880,.5);$("wst").textContent="Trening zakończony."}else beep(990,.25);
+  wmRender();
+}
+function wmTick(){
+  const s=wm.steps[wm.i];if(!s)return;wm.el++;
+  if(s.dur!=null&&wm.el>=s.dur){doLap();nextStep()}
+  else if(s.dur!=null&&s.dur-wm.el<=3)beep(660,.08);
+}
+function wmRender(){
+  const s=wm.steps[wm.i];if(!s||!wm.on&&!wm.steps.length)return;
+  const t=tgt(s),a=S.length?S.slice(-3).reduce((x,y)=>x+y.p,0)/Math.min(3,S.length):0,nx=wm.steps[wm.i+1];
+  $("wsn").textContent=s.name;
+  $("wtm").textContent=s.dur!=null?fmt(Math.max(0,Math.round(s.dur-wm.el))):fmt(wm.el)+" (okrążenie ręcznie)";
+  $("wtg").textContent=t?t[0]+"–"+t[1]+" W":"bez celu";
+  $("wtg").style.color=!wm.on||!t?"":(a>=t[0]&&a<=t[1]?"var(--wb)":"var(--lo)");
+  $("wnx").textContent=nx?nx.name+(nx.dur!=null?" ("+fmt(Math.round(nx.dur))+")":""):"koniec";
+}
+$("wf").onchange=e=>{
+  const f=e.target.files[0];if(!f)return;
+  const rd=new FileReader();
+  rd.onload=()=>{
+    try{
+      const st=parseFit(rd.result);if(!st.length)throw 0;
+      wm={steps:st,i:0,el:0,on:rec.on};
+      const tot=Math.round(st.reduce((a,x)=>a+(x.dur||0),0));
+      $("wst").textContent="Wczytano "+st.length+" bloków, łącznie "+fmt(tot)+".";wmRender();
+    }catch(x){$("wst").textContent="Nie udało się odczytać bloków. To musi być plik treningu (workout), a nie zapis jazdy."}
+  };
+  rd.readAsArrayBuffer(f);
+};
+
+const SM=location.hash==="#settings";
+if(SM){document.body.classList.add("sm");$("sett").open=true;document.title="Ustawienia"}
+let ui={hide:[],w:1150,h:900,top:false};
+function loadUI(){
+  try{const u=JSON.parse(localStorage.getItem("plui")||"null");if(u)ui={...ui,...u}}catch(e){}
+  document.querySelectorAll(".vs").forEach(c=>c.checked=!ui.hide.includes(c.dataset.k));
+  $("ww").value=ui.w;$("wh").value=ui.h;$("wt").checked=!!ui.top;
+}
+function saveUI(){
+  ui.hide=[...document.querySelectorAll(".vs")].filter(c=>!c.checked).map(c=>c.dataset.k);
+  ui.w=+$("ww").value||1150;ui.h=+$("wh").value||900;ui.top=$("wt").checked;
+  try{localStorage.setItem("plui",JSON.stringify(ui))}catch(e){}
+}
+function applyUI(){document.querySelectorAll("[data-sec]").forEach(el=>el.style.display=ui.hide.includes(el.dataset.sec)?"none":"")}
+function applyWin(){if(window.powerLive)window.powerLive.setWindow({w:ui.w,h:ui.h,top:ui.top})}
+function loadAll(){
+  try{
+    const c=JSON.parse(localStorage.getItem("pl")||"{}");
+    ["cp","wp","al","kg","ftp","hrm"].forEach(n=>{if(c[n]!=null)$(n).value=c[n]});
+    const k=JSON.parse(localStorage.getItem("plkey")||"null");
+    if(k&&k.code){lapKey=k;$("gl").checked=!!k.gl}
+  }catch(e){}
+  try{zman=JSON.parse(localStorage.getItem("plz")||"null")}catch(e){}
+  loadUI();applyUI();updateKeyUI();zoneEditor();S.length?render():reset();
+}
+loadUI();applyUI();
+if(window.powerLive){$("winset").style.display="";if(!SM)applyWin()}
+document.querySelectorAll(".vs").forEach(c=>c.addEventListener("change",()=>{saveUI();applyUI()}));
+$("wt").addEventListener("change",()=>{saveUI();applyWin()});
+$("bWin").onclick=()=>{saveUI();applyWin()};
+$("bSet").onclick=()=>{if(window.powerLive)window.open(location.href.split("#")[0]+"#settings","plsettings","width=500,height=780");else{document.body.classList.add("setin");$("sett").open=true;scrollTo(0,0)}};
+$("sx").onclick=()=>{document.body.classList.remove("setin");applyUI();S.length?render():reset()};
+window.addEventListener("storage",loadAll);
+
+// ===== Strefy i HR =====
+let lastHr=0,lastHrTs=0,zman=null;
+const PZC=["#9aa7b4","#4aa3ff","#5ad1c4","#ffd24a","#ffb347","#ff6b5e","#c04bff"];
+const HRM=()=>+$("hrm").value||190;
+const PZ=()=>zman&&zman.pz?zman.pz:[.55,.75,.90,1.05,1.20,1.50].map(x=>Math.round(x*FTP()));
+const HZ=()=>zman&&zman.hz?zman.hz:[.6,.7,.8,.9].map(x=>Math.round(x*HRM()));
+const zoneOf=(lim,v)=>{let i=0;while(i<lim.length&&v>lim[i])i++;return i};
+const zp=Array(7).fill(0),zh=Array(5).fill(0);
+function zoneEditor(){
+  const h=(pre,arr)=>arr.map((v,i)=>`<label>Z${i+1} do <input class="zi" data-k="${pre}${i}" type="number" value="${v}" min="1"></label>`).join("");
+  $("zed").innerHTML="<div class='lb'>Moc (W). Z7 = powyżej ostatniej wartości</div><div class='set'>"+h("p",PZ())+"</div><div class='lb'>Tętno (bpm). Z5 = powyżej ostatniej wartości</div><div class='set'>"+h("h",HZ())+"</div><button id='zauto' type='button'>Przelicz automatycznie</button>";
+  $("zed").querySelectorAll(".zi").forEach(i=>i.addEventListener("change",()=>saveZones(false)));
+  $("zauto").onclick=()=>saveZones(true);
+}
+function saveZones(auto){
+  const g=k=>[...document.querySelectorAll('.zi[data-k^="'+k+'"]')].map(i=>+i.value);
+  zman=auto?null:{pz:g("p"),hz:g("h")};
+  try{localStorage.setItem("plz",JSON.stringify(zman))}catch(e){}
+  zoneEditor();
+}
+function zoneRender(){
+  const s=S[S.length-1];if(!s)return;
+  const pz=zoneOf(PZ(),s.p),hz=s.hr?zoneOf(HZ(),s.hr):-1;
+  $("hrv").textContent=s.hr||"–";
+  $("zpw").textContent="Z"+(pz+1);$("zpw").style.color=PZC[pz];
+  $("zhr").textContent=hz>=0?"Z"+(hz+1):"–";$("zhr").style.color=hz>=0?PZC[hz+1]:"";
+  const row=(t,a,o)=>{const m=Math.max(1,...a);return `<div class="lb">${t}</div>`+a.map((v,i)=>`<div style="display:flex;gap:8px;align-items:center;margin:3px 0"><span style="width:26px">Z${i+1}</span><div style="flex:1;background:#0c1117;height:14px;border-radius:3px"><div style="width:${v/m*100}%;height:100%;background:${PZC[i+o]};border-radius:3px"></div></div><span style="width:48px;text-align:right">${fmt(v)}</span></div>`).join("")};
+  $("zbars").innerHTML=row("Moc",zp,0)+row("Tętno",zh,1);
+}
+try{zman=JSON.parse(localStorage.getItem("plz")||"null")}catch(e){}
+zoneEditor();
+["ftp","hrm"].forEach(i=>$(i).addEventListener("change",()=>{zoneEditor();if(S.length)render()}));
+let wl=null;
+async function wake(on){try{if(on){if(!wl){wl=await navigator.wakeLock.request("screen");wl.addEventListener("release",()=>{wl=null})}}else if(wl){await wl.release();wl=null}}catch(e){}}
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&rec.on&&!wl)wake(true)});
+const rec={on:false,t0:0};
+function live(p,hr){$("pw").textContent=p;$("a3").textContent=p;$("wk").textContent=(p/KG()).toFixed(2);$("hrv").textContent=hr||"–";$("cd").textContent=cad}
+function updateRec(){$("bRec").textContent=rec.on?"Stop":(S.length?"Wznów":"Start");$("bEnd").style.display=!rec.on&&S.length?"":"none"}
+function discard(){reset();rec.on=false;wake(false);rec.t0=0;wm.i=0;wm.el=0;wm.on=false;$("wst").textContent="";wmRender();updateRec()}
+$("bRec").onclick=()=>{
+  if(rec.on){rec.on=false;wake(false);updateRec();return}
+  if(!S.length){rec.t0=Date.now();lapStart=0;if(wm.steps.length){wm.i=0;wm.el=0;wm.on=true;beep(660,.05);wmRender()}}
+  rec.on=true;wake(true);start();updateRec();
+};
+function summary(){
+  const n=S.length,sum=a=>a.reduce((m,x)=>m+x,0),mx=a=>a.reduce((m,x)=>x>m?x:m,0);
+  const pw=S.map(x=>x.p),avg=sum(pw)/n,np=n4?(sum4/n4)**.25:avg,ftp=FTP();
+  const IF=np/ftp,tss=n*np*IF/(ftp*3600)*100;
+  const hr=S.filter(x=>x.hr).map(x=>x.hr),cd=S.filter(x=>x.c>0).map(x=>x.c);
+  const nl=laps.length+(n-lapStart>=2?1:0);
+  const t=[["Czas",fmt(n)],["Śr. moc",Math.round(avg)+" W"],["Max moc",mx(pw)+" W"],["NP",Math.round(np)+" W"],
+    ["Śr. W/kg",(avg/KG()).toFixed(2)],["IF",IF.toFixed(2)],["TSS",Math.round(tss)],["Praca",Math.round(sum(pw)/1000)+" kJ"],["Spalone",Math.round(sum(pw)/1004)+" kcal"],
+    ["Śr. HR",hr.length?Math.round(sum(hr)/hr.length)+" bpm":"–"],["Max HR",hr.length?mx(hr)+" bpm":"–"],
+    ["Śr. kadencja",cd.length?Math.round(sum(cd)/cd.length)+" rpm":"–"],["Min W'bal",(Math.min(...S.map(x=>x.wb))/1000).toFixed(1)+" kJ"],["Okrążenia",nl]];
+  return t.map(x=>`<div class="pn"><div class="lb">${x[0]}</div><div class="v" style="font-size:20px">${x[1]}</div></div>`).join("");
+}
+$("bEnd").onclick=()=>{$("ends").innerHTML=summary();$("endd").showModal()};
+$("eCan").onclick=()=>$("endd").close();
+$("eSave").onclick=async()=>{if(S.length-lapStart>=2)doLap();if(await saveFit()){discard();$("endd").close()}};
+$("eDel").onclick=()=>{if(confirm("Na pewno usunąć ten trening? Tego nie da się cofnąć.")){discard();$("endd").close()}};
+
+// ===== Eksport .fit =====
+function fitCrc(b){
+  const t=[0,0xCC01,0xD801,0x1400,0xF001,0x3C00,0x2800,0xE401,0xA001,0x6C00,0x7800,0xB401,0x5000,0x9C01,0x8801,0x4400];
+  let c=0;for(const x of b){let y=t[c&15];c=(c>>4)&0xFFF;c=c^y^t[x&15];y=t[c&15];c=(c>>4)&0xFFF;c=c^y^t[(x>>4)&15]}
+  return c;
+}
+function fitBuild(groups){
+  const parts=[];let lt=0;
+  for(const g of groups){
+    const L=lt++,def=new Uint8Array(6+g.f.length*3);
+    def[0]=0x40|L;def[3]=g.num&255;def[4]=g.num>>8;def[5]=g.f.length;
+    g.f.forEach((f,i)=>{def[6+i*3]=f[0];def[7+i*3]=f[1];def[8+i*3]=f[2]});parts.push(def);
+    const sz=g.f.reduce((a,f)=>a+f[1],0);
+    for(const row of g.rows){
+      const b=new Uint8Array(1+sz),v=new DataView(b.buffer);b[0]=L;let o=1;
+      g.f.forEach((f,i)=>{const x=row[i];if(f[1]===1)v.setUint8(o,x);else if(f[1]===2)v.setUint16(o,x,true);else v.setUint32(o,x,true);o+=f[1]});
+      parts.push(b);
+    }
+  }
+  const tot=parts.reduce((a,x)=>a+x.length,0),out=new Uint8Array(tot);let o=0;parts.forEach(x=>{out.set(x,o);o+=x.length});return out;
+}
+function buildFit(){
+  const T0=Math.floor((rec.t0||Date.now())/1000)-631065600,n=S.length,hasC=S.some(x=>x.c>0);
+  const sum=a=>a.reduce((m,x)=>m+x,0),mx=a=>a.reduce((m,x)=>x>m?x:m,0),av=(a,inv)=>a.length?Math.round(sum(a)/a.length):inv;
+  const pw=S.map(x=>x.p),hrs=S.filter(x=>x.hr).map(x=>x.hr),cds=S.filter(x=>x.c>0).map(x=>x.c);
+  const U8=[1,0x02],EN=[1,0],U16=[2,0x84],U32=[4,0x86],f=(n,t)=>[n,t[0],t[1]];
+  const g=[
+    {num:0,f:[f(0,EN),f(1,U16),f(2,U16),[3,4,0x8C],f(4,U32)],rows:[[4,255,0,1,T0]]},
+    {num:21,f:[f(253,U32),f(0,EN),f(1,EN)],rows:[[T0,0,0]]},
+    {num:20,f:[f(253,U32),f(3,U8),f(4,U8),f(7,U16)],rows:S.map((x,i)=>[T0+i+1,x.hr||255,hasC?Math.min(255,x.c):255,x.p])},
+    {num:19,f:[f(253,U32),f(254,U16),f(0,EN),f(1,EN),f(2,U32),f(7,U32),f(8,U32),f(15,U8),f(17,U8),f(19,U16),f(20,U16),f(25,EN)],
+     rows:laps.map((l,i)=>{const sg=S.slice(l.st,l.st+l.dur),h=sg.filter(x=>x.hr).map(x=>x.hr),c=sg.filter(x=>x.c>0).map(x=>x.c),q=sg.map(x=>x.p);
+       return [T0+l.st+l.dur,i,9,1,T0+l.st,l.dur*1000,l.dur*1000,av(h,255),hasC?av(c,255):255,av(q,0),mx(q),2]})},
+    {num:21,f:[f(253,U32),f(0,EN),f(1,EN)],rows:[[T0+n,0,4]]},
+    {num:18,f:[f(253,U32),f(254,U16),f(0,EN),f(1,EN),f(2,U32),f(5,EN),f(6,EN),f(7,U32),f(8,U32),f(16,U8),f(17,U8),f(18,U8),f(20,U16),f(21,U16),f(25,U16),f(26,U16),f(34,U16)],
+     rows:[[T0+n,0,8,1,T0,2,6,n*1000,n*1000,av(hrs,255),hrs.length?mx(hrs):255,hasC?av(cds,255):255,av(pw,0),mx(pw),0,laps.length,n4?Math.round((sum4/n4)**.25):av(pw,0)]]},
+    {num:34,f:[f(253,U32),f(0,U32),f(1,U16),f(2,EN),f(3,EN),f(4,EN)],rows:[[T0+n,n*1000,1,0,26,1]]}
+  ];
+  const body=fitBuild(g),h=new Uint8Array(14),hv=new DataView(h.buffer);
+  h[0]=14;h[1]=0x20;hv.setUint16(2,2132,true);hv.setUint32(4,body.length,true);h.set([0x2E,0x46,0x49,0x54],8);hv.setUint16(12,fitCrc(h.subarray(0,12)),true);
+  const out=new Uint8Array(16+body.length);out.set(h);out.set(body,14);
+  new DataView(out.buffer).setUint16(14+body.length,fitCrc(out.subarray(0,14+body.length)),true);
+  return out;
+}
+async function saveFit(){
+  if(!S.length)return false;
+  const bytes=buildFit(),name="trening-"+new Date(rec.t0||Date.now()).toISOString().slice(0,16).replace(/[:T]/g,"-")+".fit";
+  const mob=navigator.maxTouchPoints>1&&/Mac|iPhone|iPad|Android/.test(navigator.userAgent);
+  if(mob&&navigator.canShare){
+    const f=new File([bytes],name,{type:"application/octet-stream"});
+    if(navigator.canShare({files:[f]})){
+      try{await navigator.share({files:[f],title:name});return true}catch(e){if(e.name==="AbortError")return false}
+    }
+  }
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([bytes],{type:"application/octet-stream"}));a.download=name;a.click();return true;
+}
+let scanP=null;
+async function scan(k){
+  if(scanP){if(window.powerLive)window.powerLive.cancelScan();await scanP}
+  scanP=connect(k);await scanP;scanP=null;
+}
+const SI={power:"⚡",hr:"❤"};
+if(window.powerLive){
+  window.powerLive.onDevices((list,k)=>{
+    const box=$("sl-"+k);box.textContent="";
+    if(!list.length){box.textContent="Szukam czujników…";return}
+    list.forEach(x=>{
+      const b=document.createElement("button");b.type="button";
+      b.textContent=SI[k]+" "+(x.name||"Nieznane urządzenie");
+      b.onclick=()=>{box.textContent="Łączenie…";window.powerLive.pickDevice(x.id)};
+      box.appendChild(b);
+    });
+  });
+}else{$("sl-power").textContent=$("sl-hr").textContent="Po kliknięciu Szukaj Chrome pokaże własne okno wyboru urządzenia."}
+document.querySelectorAll(".sb").forEach(b=>b.onclick=()=>scan(b.dataset.k));
+$("bConn").onclick=()=>$("sens").showModal();
+$("sClose").onclick=()=>$("sens").close();
+$("sens").addEventListener("close",()=>{if(scanP&&window.powerLive)window.powerLive.cancelScan()});
+$("bDemo").onclick=()=>{demoOn=true;st("Tryb demo (dane symulowane).");start()};
+$("bLap").onclick=lapPress;$("bCsv").onclick=csv;
+let lapKey={code:"Space",ctrl:false,alt:false,shift:false,acc:"Space",label:"Spacja"},assign=false,lastLap=0;
+try{const k=JSON.parse(localStorage.getItem("plkey")||"null");if(k&&k.code){lapKey=k;$("gl").checked=!!k.gl}}catch(e){}
+const MOD=/^(Control|Alt|Shift|Meta)/;
+function lapPress(){const n=Date.now();if(!rec.on||n-lastLap<400)return;lastLap=n;const cs=wm.on&&wm.steps[wm.i];doLap();if(cs&&cs.dur==null)nextStep()}
+function saveKey(){try{localStorage.setItem("plkey",JSON.stringify({...lapKey,gl:$("gl").checked}))}catch(e){}}
+function toAccel(e){
+  const c=e.code;let k=null;
+  if(/^Key[A-Z]$/.test(c))k=c.slice(3);
+  else if(/^Digit\d$/.test(c))k=c.slice(5);
+  else if(/^F\d{1,2}$/.test(c))k=c;
+  else if(/^Numpad\d$/.test(c))k="num"+c.slice(6);
+  else k=({Space:"Space",Enter:"Enter",PageUp:"PageUp",PageDown:"PageDown",Home:"Home",End:"End",Insert:"Insert",Delete:"Delete",
+    ArrowUp:"Up",ArrowDown:"Down",ArrowLeft:"Left",ArrowRight:"Right",Period:".",Comma:",",
+    MediaTrackNext:"MediaNextTrack",MediaTrackPrevious:"MediaPreviousTrack",MediaPlayPause:"MediaPlayPause",MediaStop:"MediaStop"})[c]||null;
+  if(!k)return null;
+  return [e.ctrlKey&&"Ctrl",e.altKey&&"Alt",e.shiftKey&&"Shift"].filter(Boolean).concat(k).join("+");
+}
+function updateKeyUI(){
+  $("bKey").textContent=assign?"Naciśnij przycisk… (Esc anuluje)":lapKey.label;
+  $("bLap").textContent="Okrążenie ("+lapKey.label+")";
+}
+async function applyGlobal(){
+  if(!window.powerLive)return;
+  const want=$("gl").checked;
+  if(want&&lapKey.code==="Space"){await window.powerLive.setLapShortcut(null);$("kst").textContent="Spacji nie da się ustawić globalnie. Wybierz inny przycisk.";return}
+  if(want&&!lapKey.acc){await window.powerLive.setLapShortcut(null);$("kst").textContent="Ten przycisk nie nadaje się na skrót globalny.";return}
+  const ok=await window.powerLive.setLapShortcut(want?lapKey.acc:null);
+  $("kst").textContent=want?(ok?"Skrót globalny aktywny: ten przycisk nie zadziała już w innych programach.":"Nie udało się zarejestrować skrótu (może jest zajęty)."):"";
+}
+document.addEventListener("keydown",e=>{
+  if(assign){
+    e.preventDefault();
+    if(MOD.test(e.code))return;
+    assign=false;
+    if(e.code!=="Escape"){
+      const acc=toAccel(e);
+      lapKey={code:e.code,ctrl:e.ctrlKey,alt:e.altKey,shift:e.shiftKey,acc,label:acc?acc.replace("Space","Spacja"):e.code};
+      saveKey();applyGlobal();
+    }
+    updateKeyUI();return;
+  }
+  if(e.target.tagName==="INPUT"||e.repeat)return;
+  if(e.code===lapKey.code&&e.ctrlKey===lapKey.ctrl&&e.altKey===lapKey.alt&&e.shiftKey===lapKey.shift){e.preventDefault();lapPress()}
+});
+$("bKey").onclick=()=>{assign=true;$("bKey").blur();updateKeyUI()};
+$("gl").addEventListener("change",()=>{saveKey();applyGlobal()});
+if(window.powerLive){$("glw").style.display="";window.powerLive.onLap(lapPress);applyGlobal()}
+updateKeyUI();
+$("kg").addEventListener("change",()=>{if(S.length)render()});
+$("wp").addEventListener("change",()=>{if(!S.length)wb=WP()});
+reset();
+</script></body></html>
